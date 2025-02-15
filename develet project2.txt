@@ -1,0 +1,77 @@
+import json
+
+class RecipeManager:
+    def _init_(self, filename="recipes.json"):
+        self.filename = filename
+        self.recipes = self.load_recipes()
+
+    def load_recipes(self):
+        try:
+            with open(self.filename, "r") as file:
+                return json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+
+    def save_recipes(self):
+        with open(self.filename, "w") as file:
+            json.dump(self.recipes, file, indent=4)
+
+    def add_recipe(self):
+        name = input("Enter recipe name: ")
+        ingredients = input("Enter ingredients (comma-separated): ").split(",")
+        instructions = input("Enter cooking instructions: ")
+        category = input("Enter category (e.g., vegetarian, dessert): ")
+        cuisine = input("Enter cuisine type: ")
+        difficulty = input("Enter difficulty level (Easy, Medium, Hard): ")
+        
+        recipe = {
+            "name": name,
+            "ingredients": [ing.strip() for ing in ingredients],
+            "instructions": instructions,
+            "category": category,
+            "cuisine": cuisine,
+            "difficulty": difficulty
+        }
+        
+        self.recipes.append(recipe)
+        self.save_recipes()
+        print("Recipe added successfully!\n")
+    
+    def search_recipe(self):
+        search_by = input("Search by (ingredient/category): ").lower()
+        keyword = input("Enter search term: ").lower()
+        results = []
+        
+        if search_by == "ingredient":
+            results = [r for r in self.recipes if keyword in [i.lower() for i in r["ingredients"]]]
+        elif search_by == "category":
+            results = [r for r in self.recipes if keyword in r["category"].lower()]
+        
+        if results:
+            print("\nSearch Results:")
+            for r in results:
+                print(f"- {r['name']} ({r['cuisine']}, {r['difficulty']})")
+        else:
+            print("No recipes found matching your criteria.")
+    
+    def run(self):
+        while True:
+            print("\nRecipe Manager")
+            print("1. Add Recipe")
+            print("2. Search Recipe")
+            print("3. Exit")
+            choice = input("Choose an option: ")
+            
+            if choice == "1":
+                self.add_recipe()
+            elif choice == "2":
+                self.search_recipe()
+            elif choice == "3":
+                print("Exiting Recipe Manager. Goodbye!")
+                break
+            else:
+                print("Invalid choice, please try again.")
+
+if _name_ == "_main_":
+    manager = RecipeManager()
+    manager.run()
